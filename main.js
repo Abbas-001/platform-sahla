@@ -1,4 +1,4 @@
-  // ==================== ربط Firebase ====================
+// ==================== ربط Firebase ====================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import {
     getAuth,
@@ -30,7 +30,6 @@
   const db = getFirestore(app);
   // ==========================================================
 
-
 let currentUser = null;
 
 let currentTab = 'courses';
@@ -39,10 +38,12 @@ let currentProjectFilter = 'الكل';
 let currentSocialFilter = 'الكل';
 let searchQuery = '';
 
+// متغيرات البيانات الخاصة بالمستخدم الحالي فقط
 let courses = [];
 let projects = [];
 let socialIdeas = [];
 
+// دالة تحميل بيانات المستخدم الحالي بشكل مستقل تماماً من فايربيس
 async function loadUserData() {
     if (!currentUser || !currentUser.uid) return;
 
@@ -52,17 +53,19 @@ async function loadUserData() {
 
         if (snap.exists() && snap.data().courses !== undefined) {
             const data = snap.data();
+            // جلب البيانات الخاصة بهذا المستخدم فقط
             courses = data.courses || [];
             projects = data.projects || [];
             socialIdeas = data.socialIdeas || [];
         } else {
+            // إذا كان المستخدم جديداً تماماً، ننشئ له محتوى افتراضي خاص بحسابه فقط
             courses = [
                 {
                     id: '1',
                     name: 'دورة البرمجة بلغة JavaScript',
                     desc: 'تعلم الأساسيات والمتقدم في جافاسكريبت',
-                    instructor: 'أحمد علي',
-                    instructorEmail: 'ahmed@example.com',
+                    instructor: currentUser.name || 'مدرب الحساب',
+                    instructorEmail: currentUser.email,
                     status: 'قيد الانجاز',
                     startDate: '2026-03-01',
                     endDate: '2026-04-01',
@@ -75,28 +78,27 @@ async function loadUserData() {
             projects = [
                 {
                     id: '1',
-                    projectName: 'تطوير متجر إلكتروني',
-                    projectDesc: 'متجر متكامل لبيع المنتجات الرقمية',
-                    clientName: 'شركة التقنية الحديثة',
-                    clientPhone: '07701234567',
-                    clientNotes: 'يفضل تسليم أولي سريع',
-                    totalAmount: 1500,
-                    paidAmount: 1000,
+                    projectName: 'مشروعي الأول',
+                    projectDesc: 'وصف المشروع الخاص بي',
+                    clientName: 'عميل تجريبي',
+                    clientPhone: '07700000000',
+                    clientNotes: '',
+                    totalAmount: 1000,
+                    paidAmount: 500,
                     projectStatus: 'قيد الانجاز',
                     projectStartDate: '2026-03-01',
                     projectDeadline: '2026-03-30',
-                    projectNotes: 'استخدام Tailwind CSS',
+                    projectNotes: '',
                     todos: [
-                        { text: 'تصميم الواجهات', done: true },
-                        { text: 'ربط البوابات المالية', done: false }
+                        { text: 'الخطوة الأولى', done: false }
                     ]
                 }
             ];
             socialIdeas = [
                 {
                     id: '1',
-                    title: 'فيديو شرح خصائص جافاسكريبت الحديثة',
-                    desc: 'شرح مبسط ومختصر لتعابير ES6',
+                    title: 'فكرتي الأولى للنشر',
+                    desc: 'وصف الفكرة',
                     platform: 'تيك توك',
                     status: 'فكرة'
                 }
@@ -109,6 +111,7 @@ async function loadUserData() {
     }
 }
 
+// دالة حفظ بيانات المستخدم الحالي في مستندة الخاص في فايربيس
 async function saveUserData() {
     if (!currentUser || !currentUser.uid) return;
     try {
@@ -179,6 +182,12 @@ async function handleRegister(e) {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: name });
         currentUser = { uid: cred.user.uid, name: name, email: cred.user.email };
+        
+        // تفريغ البيانات القديمة إن وجدت وتهيئة بيانات جديدة للمستخدم الجديد حصراً
+        courses = [];
+        projects = [];
+        socialIdeas = [];
+        
         await initApp();
         showToast('تم إنشاء الحساب وتسجيل الدخول بنجاح', 'success');
     } catch (err) {
@@ -199,6 +208,10 @@ async function handleRegister(e) {
 
 function logout() {
     signOut(auth).then(() => {
+        currentUser = null;
+        courses = [];
+        projects = [];
+        socialIdeas = [];
         showToast('تم تسجيل الخروج بنجاح', 'info');
     }).catch((err) => {
         showToast('حدث خطأ أثناء تسجيل الخروج', 'error');
@@ -220,13 +233,14 @@ async function initApp() {
     }
 }
 
-// يراقب حالة الدخول تلقائيًا: يبقي المستخدم مسجلاً عند تحديث الصفحة،
-// ويحدّث الواجهة عند تسجيل الدخول أو الخروج من أي مكان في الكود
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = { uid: user.uid, name: user.displayName || '', email: user.email };
     } else {
         currentUser = null;
+        courses = [];
+        projects = [];
+        socialIdeas = [];
     }
     await initApp();
 });
@@ -829,8 +843,6 @@ function showToast(msg, type = 'success') {
     }, 3000);
 }
 
-// تصدير الدوال إلى window لأن هذا الملف يعمل كـ ES Module بسبب استيراد Firebase،
-// والـ onclick/onsubmit في HTML يبحث عن الدوال في window فقط
 window.switchAuthMode = switchAuthMode;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
