@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة سَهلة للإدارة المتكاملة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- ==================== AUTH SCREEN (LOGIN / REGISTER) ==================== -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 flex flex-col">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-center text-white relative">
+                <div class="w-16 h-16 bg-cyan-500/20 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-inner">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <h2 class="text-2xl font-bold">منصة سَهلة للإدارة المتكاملة</h2>
+                <p class="text-slate-400 text-xs mt-1">إدارة مشاريعك، دوراتك، وأفكارك بمكان واحد</p>
+            </div>
+
+            <div class="flex border-b border-slate-100 bg-slate-50 p-2 gap-2">
+                <button onclick="switchAuthMode('login')" id="auth-tab-login" class="flex-1 py-2.5 rounded-xl font-bold text-sm transition bg-white text-cyan-600 shadow-sm">تسجيل الدخول</button>
+                <button onclick="switchAuthMode('register')" id="auth-tab-register" class="flex-1 py-2.5 rounded-xl font-bold text-sm transition text-slate-500 hover:text-slate-700">إنشاء حساب جديد</button>
+            </div>
+
+            <div class="p-8">
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني</label>
+                        <div class="relative">
+                            <input type="email" id="loginEmail" required placeholder="name@example.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور</label>
+                        <div class="relative">
+                            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:from-cyan-600 hover:to-blue-700 transition">
+                        تسجيل الدخول
+                    </button>
+                </form>
+
+                <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">الاسم الكامل</label>
+                        <div class="relative">
+                            <input type="text" id="regName" required placeholder="محمد أحمد" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني</label>
+                        <div class="relative">
+                            <input type="email" id="regEmail" required placeholder="name@example.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور</label>
+                        <div class="relative">
+                            <input type="password" id="regPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:from-cyan-600 hover:to-blue-700 transition">
+                        إنشاء الحساب الآن
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="app" class="flex-1 flex overflow-hidden hidden">
+        
+        <!-- ==================== SIDEBAR (RIGHT) ==================== -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 shadow-xl z-20">
+            <div>
+                <!-- Account Header -->
+                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <h2 id="userNameDisplay" class="font-bold text-white text-sm">حساب المستخدم</h2>
+                        <p id="userEmailDisplay" class="text-xs text-slate-400 mt-0.5">user@example.com</p>
+                    </div>
+                    <i class="fa-solid fa-user-circle text-cyan-400 text-xl"></i>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-4 space-y-1">
+                    <button onclick="switchTab('projects')" id="nav-projects" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800 text-slate-300">
+                        <i class="fa-solid fa-diagram-project w-5"></i>
+                        <span>إدارة المشاريع</span>
+                    </button>
+                    <button onclick="switchTab('courses')" id="nav-courses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition bg-slate-800 text-white shadow-inner">
+                        <i class="fa-solid fa-graduation-cap w-5 text-cyan-400"></i>
+                        <span>الدورات التدريبية</span>
+                    </button>
+                    <button onclick="switchTab('social')" id="nav-social" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800 text-slate-300">
+                        <i class="fa-solid fa-share-nodes w-5"></i>
+                        <span>منصات التواصل</span>
+                    </button>
+
+                    <div class="pt-4 pb-2 border-t border-slate-800 my-2"></div>
+
+                    <button onclick="exportData()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 text-slate-300">
+                        <i class="fa-solid fa-file-export w-5 text-emerald-400"></i>
+                        <span>تصدير البيانات (CSV)</span>
+                    </button>
+                    <label class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 text-slate-300 cursor-pointer">
+                        <i class="fa-solid fa-file-import w-5 text-amber-400"></i>
+                        <span>استيراد البيانات (CSV)</span>
+                        <input type="file" id="importFile" accept=".csv,.json" class="hidden" onchange="importData(event)">
+                    </label>
+                </nav>
+            </div>
+
+            <!-- Logout -->
+            <div class="p-4 border-t border-slate-800">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition hover:bg-rose-500/10 text-rose-400">
+                    <i class="fa-solid fa-right-from-bracket w-5"></i>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ==================== MAIN CONTENT AREA ==================== -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Bar -->
+            <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shrink-0 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span id="page-icon" class="text-cyan-600 text-xl"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <h1 id="page-title" class="text-xl font-bold text-slate-900">الدورات التدريبية</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="بحث سريع..." class="bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-cyan-500 w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Views Container -->
+            <div class="p-8 flex-1">
+
+                <!-- 1. COURSES VIEW -->
+                <div id="view-courses" class="space-y-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                            <button onclick="filterCourses('الكل')" id="filter-course-الكل" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-cyan-500 text-white shadow-sm">الكل</button>
+                            <button onclick="filterCourses('قيد الانجاز')" id="filter-course-قيد الانجاز" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">قيد الانجاز</button>
+                            <button onclick="filterCourses('منجز')" id="filter-course-منجز" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">منجز</button>
+                            <button onclick="filterCourses('متوقف')" id="filter-course-متوقف" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">متوقف</button>
+                            <button onclick="filterCourses('ملغي')" id="filter-course-ملغي" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">ملغي</button>
+                        </div>
+                        <button onclick="openCourseModal()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-md hover:from-cyan-600 hover:to-blue-700 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة دورة جديدة</span>
+                        </button>
+                    </div>
+
+                    <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic Course Cards -->
+                    </div>
+                </div>
+
+                <!-- 2. PROJECTS VIEW -->
+                <div id="view-projects" class="space-y-6 hidden">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                            <button onclick="filterProjects('الكل')" id="filter-proj-الكل" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-cyan-500 text-white shadow-sm">الكل</button>
+                            <button onclick="filterProjects('قيد الانجاز')" id="filter-proj-قيد الانجاز" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">قيد الانجاز</button>
+                            <button onclick="filterProjects('منجز')" id="filter-proj-منجز" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">منجز</button>
+                            <button onclick="filterProjects('متوقف')" id="filter-proj-متوقف" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">متوقف</button>
+                            <button onclick="filterProjects('ملغي')" id="filter-proj-ملغي" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">ملغي</button>
+                        </div>
+                        <button onclick="openProjectModal()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-md hover:from-cyan-600 hover:to-blue-700 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة مشروع جديد</span>
+                        </button>
+                    </div>
+
+                    <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic Project Cards -->
+                    </div>
+                </div>
+
+                <!-- 3. SOCIAL MEDIA VIEW -->
+                <div id="view-social" class="space-y-6 hidden">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                            <button onclick="filterSocial('الكل')" id="filter-soc-الكل" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-cyan-500 text-white shadow-sm">الكل</button>
+                            <button onclick="filterSocial('فكرة')" id="filter-soc-فكرة" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">فكرة</button>
+                            <button onclick="filterSocial('قيد الاجراء')" id="filter-soc-قيد الاجراء" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">قيد الإجراء</button>
+                            <button onclick="filterSocial('تم اكمال الاجراء')" id="filter-soc-تم اكمال الاجراء" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">تم اكمال الإجراء</button>
+                        </div>
+                        <button onclick="openSocialModal()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-md hover:from-cyan-600 hover:to-blue-700 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة فكرة جديدة</span>
+                        </button>
+                    </div>
+
+                    <div id="social-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic Social Cards -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== MODALS & TOAST ==================== -->
+
+    <!-- Course Modal -->
+    <div id="courseModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 id="courseModalTitle" class="font-bold text-slate-800 text-lg">إضافة دورة جديدة</h3>
+                <button onclick="closeCourseModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <form id="courseForm" onsubmit="saveCourse(event)" class="space-y-4">
+                    <input type="hidden" id="courseId">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">اسم الدورة</label>
+                        <input type="text" id="courseName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">وصف الدورة</label>
+                        <textarea id="courseDesc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">اسم المدرب</label>
+                            <input type="text" id="courseInstructor" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني للمدرب</label>
+                            <input type="email" id="courseInstructorEmail" placeholder="instructor@example.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">الحالة</label>
+                            <select id="courseStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                                <option value="قيد الانجاز">قيد الانجاز</option>
+                                <option value="منجز">منجز</option>
+                                <option value="متوقف">متوقف</option>
+                                <option value="ملغي">ملغي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">تاريخ البدء</label>
+                            <input type="date" id="courseStartDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">تاريخ الانتهاء</label>
+                        <input type="date" id="courseEndDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+
+                    <!-- Lectures dynamic section -->
+                    <div class="border-t border-slate-200 pt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-700">المحاضرات (العنوان ورابط المحاضرة)</label>
+                            <button type="button" onclick="addLectureInput()" class="text-xs text-cyan-600 font-bold hover:underline">+ إضافة محاضرة</button>
+                        </div>
+                        <div id="lecturesContainer" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeCourseModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium hover:bg-slate-50">إلغاء</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold shadow-md">حفظ الدورة</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[95vh]">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 id="projectModalTitle" class="font-bold text-slate-800 text-lg">إدارة تفاصيل المشروع</h3>
+                <button onclick="closeProjectModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <form id="projectForm" onsubmit="saveProject(event)" class="space-y-6">
+                    <input type="hidden" id="projectId">
+                    
+                    <!-- Part 1: Client & Financials -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+                        <h4 class="text-xs font-bold text-cyan-700 uppercase tracking-wider">القسم الأول: بيانات العميل والماليات</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">اسم العميل</label>
+                                <input type="text" id="clientName" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">رقم الهاتف</label>
+                                <input type="text" id="clientPhone" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">ملاحظات العميل</label>
+                            <textarea id="clientNotes" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">المبلغ الكلي</label>
+                                <input type="number" id="totalAmount" oninput="calculateRemaining()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500" value="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">المبلغ المدفوع (الدفعات)</label>
+                                <input type="number" id="paidAmount" oninput="calculateRemaining()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500" value="0">
+                            </div>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-700 bg-white p-3 rounded-xl border border-slate-200 flex justify-between">
+                            <span>المبلغ المتبقي:</span>
+                            <span id="remainingAmountDisplay" class="text-cyan-600 font-bold">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Part 2: Project Details & Todo -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+                        <h4 class="text-xs font-bold text-cyan-700 uppercase tracking-wider">القسم الثاني: تفاصيل المشروع والمهام</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">عنوان المشروع</label>
+                                <input type="text" id="projectName" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">حالة المشروع</label>
+                                <select id="projectStatus" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                                    <option value="قيد الانجاز">قيد الانجاز</option>
+                                    <option value="منجز">منجز</option>
+                                    <option value="متوقف">متوقف</option>
+                                    <option value="ملغي">ملغي</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">وصف المشروع</label>
+                            <textarea id="projectDesc" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">موعد البدء</label>
+                                <input type="date" id="projectStartDate" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">موعد التسليم</label>
+                                <input type="date" id="projectDeadline" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">ملاحظات المشروع</label>
+                            <textarea id="projectNotes" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                        </div>
+
+                        <!-- Todo list section -->
+                        <div class="border-t border-slate-200 pt-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-bold text-slate-700">قائمة المهام (Todo List)</label>
+                                <button type="button" onclick="addTodoItem()" class="text-xs text-cyan-600 font-bold hover:underline">+ إضافة مهمة</button>
+                            </div>
+                            <div id="todoContainer" class="space-y-2">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeProjectModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium hover:bg-slate-50">إلغاء</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold shadow-md">حفظ المشروع</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Idea Modal -->
+    <div id="socialModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 flex flex-col">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 id="socialModalTitle" class="font-bold text-slate-800 text-lg">إدارة فكرة السوشيال ميديا</h3>
+                <button onclick="closeSocialModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <form id="socialForm" onsubmit="saveSocial(event)" class="space-y-4">
+                    <input type="hidden" id="socialId">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">عنوان الفكرة</label>
+                        <input type="text" id="socialTitle" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">الشرح والفكرة بالتفصيل</label>
+                        <textarea id="socialDesc" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">المنصة المستهدفة</label>
+                            <select id="socialPlatform" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                                <option value="تيك توك">تيك توك</option>
+                                <option value="انستغرام">انستغرام</option>
+                                <option value="يوتيوب">يوتيوب</option>
+                                <option value="تويتر (X)">تويتر (X)</option>
+                                <option value="لينكد إن">لينكد إن</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">التصنيف</label>
+                            <select id="socialStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                                <option value="فكرة">فكرة</option>
+                                <option value="قيد الاجراء">قيد الاجراء</option>
+                                <option value="تم اكمال الاجراء">تم اكمال الاجراء</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeSocialModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium hover:bg-slate-50">إلغاء</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold shadow-md">حفظ الفكرة</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 text-sm font-medium">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">تمت العملية بنجاح</span>
+    </div>
+    <script src="main.js" type="module"></script>
+</body>
+</html>
